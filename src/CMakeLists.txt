@@ -18,3 +18,7 @@ set(HEADER_FILES
 add_executable(Savefile
 	${SOURCE_FILES}
 	${HEADER_FILES})
+
+if(WIN32)
+	target_link_libraries(Savefile ws2_32)
+endif(WIN32)

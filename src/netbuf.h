@@ -3,7 +3,11 @@
 
 #include <iomanip>
 #include <iostream>
+#ifdef WIN32
+#include <Winsock2.h>
+#else
 #include <netinet/in.h>
+#endif
 #include <sstream>
 
 enum BufPos {

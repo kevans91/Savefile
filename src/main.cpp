@@ -1,6 +1,8 @@
 #include <iostream>
+#include <fstream>
 
 #include "args.h"
+#include "datatypes.h"
 #include "savefile.h"
 
 int main(int argc, char **argv) {
@@ -14,6 +16,7 @@ int main(int argc, char **argv) {
 			std::cout << "ERROR: Failed to load savefile." << std::endl;
 		} else {
 			std::cout << "Reading savefile..." << std::endl;
+			sfile.Read();
 		}
 	}
 	return 0;

@@ -17,6 +17,12 @@ int main(int argc, char **argv) {
 		} else {
 			std::cout << "Reading savefile..." << std::endl;
 			sfile.Read();
+			if(arglist.Exists("-cd")) {
+				std::string cdDir = arglist.Value("-cd");
+				std::cout << sfile.ExportText(cdDir) << std::endl;
+			} else {
+				std::cout << sfile.ExportText("/") << std::endl;
+			}
 		}
 	}
 	return 0;

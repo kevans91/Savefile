@@ -48,25 +48,32 @@ struct Node {
 		return false;
 	}
 
-	std::string Dump(unsigned int level = 0) {
+	std::string Dump(signed char level = 0, bool dumpSelf = true) {
 		std::ostringstream retString;
 		std::string tabString = "";
-		for(unsigned int i = 0; i < level; i++) {
+		for(unsigned char i = 0; i < level; i++) {
 			tabString += '\t';
 		}
 
-		if(!name.empty()) {
-			retString << tabString << name;
-			if(data != NULL) {
-				retString << " = " << data->ToString();
+		if(dumpSelf) {
+			if(!name.empty()) {
+				retString << tabString << name;
+				if(data != NULL) {
+					retString << " = " << data->ToString();
+				}
 			}
+		} else {
+			level --;
 		}
-
 		retString << '\n';
-
-		for(std::vector<Node *>::iterator iter = children.begin(); iter != children.end(); ++iter) {
-			retString << (*iter)->Dump(level + 1);
+		if(children.size()) {
+			for(std::vector<Node *>::iterator iter = children.begin(); iter != children.end(); ++iter) {
+				retString << (*iter)->Dump(level + 1);
+			}
+		} else if(!dumpSelf && data != NULL) {
+			retString << tabString << ". = " << data->ToString();
 		}
+
 		return retString.str();
 	}
 
@@ -123,6 +130,34 @@ public:
 		if(name.empty()) return false;
 		fileName = name;
 		return Load();
+	}
+
+	Node * cd(std::string path) {
+		Node * curNode = tree;
+		if(path[0] == '/') path.erase(0,1);
+		while(!path.empty()) {
+			unsigned int slashPos = path.find('/');
+			std::string dir = path.substr(0, slashPos);
+			bool found = false;
+			for(std::vector<Node *>::iterator iter = curNode->children.begin(); iter != curNode->children.end(); iter++) {
+				if((*iter)->name == dir) {
+					curNode = (*iter);
+					found = true;
+					break;
+				}
+			}
+			if(!found) break;			// We're lacking, break. 
+
+			if(slashPos != std::string::npos) path.erase(0, slashPos + 1);
+			else break;
+		}
+
+		return curNode;
+	}
+
+	std::string ExportText(const std::string& path) {
+		Node * curNode = cd(path);
+		return curNode->Dump(0, false);
 	}
 
 	bool Read();

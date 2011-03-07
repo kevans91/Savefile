@@ -1,46 +1,59 @@
 #ifndef ARGS_H
 #define ARGS_H
 
-#include <map>
 #include <string>
+#include <vector>
 
 class Args {
 protected:
 private:
-	std::map<std::string, std::string>	argList;
-	std::string				argInput;
+	std::vector<std::string>		argList;
 	std::string				appPath;
 public:
-	Args(int argc, char **argv, bool inputReq = true) {
+	Args(int argc, char **argv) {
 		if(argc) {
 			appPath = argv[0]; 
 			for(unsigned int i = 1; i < argc; i++) {
-				if(argv[i][0] != '-') {
-					argInput = argv[i];
-					continue;
-				} else if(argc > (i + 1) && (argv[i + 1][0] != '-' && (!inputReq || (inputReq && (i + 2 < argc))))) {
-					// -k value
-					argList[argv[i]] = argv[i + 1];
-					i ++;
-				} else {		// It's a switch.
-					argList[argv[i]] = "";
-				}
+				argList.push_back(argv[i]);
 			}
 		}
 	}
 
 	unsigned int Count() const { return argList.size(); }
-	std::string Input() const { return argInput; }
+	std::string Input() const { 
+		for(unsigned int i = 0; i < argList.size(); ++i) {
+			if(argList[i][0] == '-') {
+				++i;
+				if((i + 1) >= argList.size()) {
+					 // There's nothing left.
+					return argList[i];
+				}
+			} else {
+				return argList[i];
+			}
+		}
 
-	bool Exists(const std::string& key) const { return (argList.find(key) != argList.end()); }
-
-	std::string Value(const std::string& key) const {
-		std::map<std::string, std::string>::const_iterator iter = argList.find(key);
-		if(iter != argList.end()) return iter->second;
-		else return "";
+		return "";
 	}
 
-	inline bool operator !() const { return (!argList.size() && argInput.empty()); }
+	bool Exists(const std::string& key) const {
+		for(unsigned int i = 0; i < argList.size(); ++i) {
+			if(argList[i] == key) return true;
+		}
+		return false;
+	}
+
+	std::string Value(const std::string& key) const {
+		for(unsigned int i = 0; i < argList.size(); ++i ) {
+			if(argList[i] == key) {
+				if((i + 1) > argList.size()) return "";
+				return argList[i + 1];
+			}
+		}
+		return "";
+	}
+
+	inline bool operator !() const { return (!argList.size()); }
 };
 
 #endif	// ARGS_H

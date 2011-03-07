@@ -20,7 +20,7 @@ bool Savefile::Read() {
 	for(std::vector<Entry *>::iterator iter = entries.begin(); iter != entries.end(); ) {
 		Entry * entry = (*iter);
 		if(!tree && entry->ParentIndex() == std::numeric_limits<unsigned int>::max()) {
-			tree = new Node(entry->Index(), "root", NULL);
+			tree = new Node(entry->Index(), "", NULL);
 			entries.erase(iter);
 			iter = entries.begin();		// Start over.
 			delete entry;
@@ -49,7 +49,6 @@ bool Savefile::Read() {
 		}
 	}
 	if(!tree) return false;
-	std::cout << tree->Dump() << std::endl;
 
 	return true;
 }

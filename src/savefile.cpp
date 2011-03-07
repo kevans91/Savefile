@@ -22,7 +22,6 @@ bool Savefile::Read() {
 		if(!tree && entry->ParentIndex() == std::numeric_limits<unsigned int>::max()) {
 			tree = new Node(entry->Index(), "", NULL);
 			entries.erase(iter);
-			iter = entries.begin();		// Start over.
 			delete entry;
 			entry = NULL;
 		} else {

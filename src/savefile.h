@@ -48,6 +48,23 @@ struct Node {
 		return false;
 	}
 
+	Node * Child(std::string name) {
+		size_t spos = name.find('/');
+
+		while(spos != std::string::npos) {
+			if(!spos) name.erase(spos, 1);
+			else name.erase(spos);
+			spos = name.find('/');
+		}
+
+		for(std::vector<Node *>::iterator iter = children.begin(); iter != children.end(); iter++) {
+			if((*iter)->name == name) {
+				return (*iter);
+			}
+		}
+		return NULL;
+	}
+
 	std::string Dump(signed char level = 0, bool dumpSelf = true) {
 		std::ostringstream retString;
 		std::string tabString = "";
@@ -133,20 +150,14 @@ public:
 	}
 
 	Node * cd(std::string path) {
-		Node * curNode = tree;
+		Node * curNode = tree, *newNode = NULL;
 		if(path[0] == '/') path.erase(0,1);
 		while(!path.empty()) {
-			unsigned int slashPos = path.find('/');
+			size_t slashPos = path.find('/');
 			std::string dir = path.substr(0, slashPos);
-			bool found = false;
-			for(std::vector<Node *>::iterator iter = curNode->children.begin(); iter != curNode->children.end(); iter++) {
-				if((*iter)->name == dir) {
-					curNode = (*iter);
-					found = true;
-					break;
-				}
-			}
-			if(!found) break;			// We're lacking, break. 
+			newNode = curNode->Child(dir);
+			if(!newNode) break;
+			curNode = newNode;
 
 			if(slashPos != std::string::npos) path.erase(0, slashPos + 1);
 			else break;
@@ -162,6 +173,7 @@ public:
 
 	bool Read();
 
+	inline Node * operator [](const std::string& path) { return cd(path); }
 	inline bool operator !() const { return (!fileBuf || !(*fileBuf)); }
 };
 

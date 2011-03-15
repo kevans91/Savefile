@@ -181,7 +181,7 @@ public:
 		return ret;
 	}
 
-	unsigned char *ReadStr(unsigned int length) {
+	unsigned char *ReadData(unsigned int length) {
 		if(!length || !Available(length)) return NULL;
 		unsigned char * ret = new unsigned char[length + 1];
 		ret[length] = 0;
@@ -189,18 +189,22 @@ public:
 		return ret;
 	}
 
-	char * ReadRawStr(unsigned int &length, unsigned char finalChr = 0x0) {
-		length = 0;
-		for(unsigned int offset = bufPtr; offset < bufSize && bufData[offset] != finalChr; offset++) {
-			length++;
-		};
-		if(!length) return NULL;
-		char * readStr = new char[length + 1];
-		readStr[length] = 0;
-		for(unsigned int offset = bufPtr; bufData[offset] != finalChr && (offset - bufPtr) != length; offset++) {
-			readStr[(offset - bufPtr)] = bufData[offset];
+	std::string ReadStr(char finalChr = 0x0) {
+		std::string readStr;
+		for(; bufData[bufPtr] != finalChr && bufPtr < bufSize; bufPtr++) {
+			readStr += static_cast<char>(bufData[bufPtr]);
 		}
-		bufPtr += (length + 1);
+		bufPtr ++;
+		return readStr;
+	}
+
+	std::string ReadStr(unsigned int length) {
+		std::string readStr;
+		readStr.resize(length);
+		for(; readStr.size() < length && bufPtr < bufSize; bufPtr++) {
+			readStr += static_cast<char>(bufData[bufPtr]);
+		}
+		bufPtr ++;
 		return readStr;
 	}
 

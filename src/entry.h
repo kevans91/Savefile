@@ -177,7 +177,7 @@ struct EntryData : public Readable {
 				extraInfo->dataOffset ++;
 				StringEncoder strEncoder;
 				fileValue->name = strEncoder.Decode(fileBuf, *extraInfo, isListVal);
-				fileValue->data = fileBuf->ReadStr(fileValue->size);
+				fileValue->data = fileBuf->ReadData(fileValue->size);
 				strEncoder.Decode(fileValue->data, fileValue->size, *extraInfo, isListVal);
 				break;
 			}
@@ -258,7 +258,7 @@ struct Entry : public Readable {
 		nameSize = dataBuf->ReadInt<unsigned char>();
 		if(nameSize != 0) {
 			unsigned int nameStart = dataBuf->Pos() - dataStart;
-			name = dataBuf->ReadStr(nameSize);
+			name = dataBuf->ReadData(nameSize);
 			for(unsigned char i = 0; i < nameSize; i++) {
 				name[i] ^= (2 + (9 * (nameStart + i)));
 			}

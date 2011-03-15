@@ -99,7 +99,7 @@ struct StringEncoder {
 
 		unsigned short length = dataBuf->ReadInt<unsigned short>();
 		length = encoder(length, extra, listVal);
-		unsigned char * str = dataBuf->ReadStr(length);
+		unsigned char * str = dataBuf->ReadData(length);
 		if(!str) return "";
 		for(unsigned short i = 0; i < length; i++) {
 			if(!listVal) str[i] ^= (0x42 + first + (9 * ((extra.dataOffset + offset++) - extra.entryOffset)));

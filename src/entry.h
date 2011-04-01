@@ -4,6 +4,7 @@
 #include <map>
 #include <sstream>
 
+#include "crc.h"
 #include "datatypes.h"
 #include "readable.h"
 
@@ -26,11 +27,11 @@ struct ListInfo {
 
 struct FileInfo {
 	unsigned int size;
-	unsigned int crc32;
+	unsigned int crc;
 	unsigned char type;
 	std::string name;
 	unsigned char * data;
-	FileInfo() : size(0), crc32(0), type(0), data(NULL) {
+	FileInfo() : size(0), crc(0), type(0), data(NULL) {
 
 	};
 
@@ -39,6 +40,13 @@ struct FileInfo {
 			delete [] data;
 			data = NULL;
 		}
+	}
+
+	bool IsValid() const {
+		if(!size || !name.size() || !data) return false;
+
+		CRC crc32(data, size);
+		return (crc32() == crc);
 	}
 };
 
@@ -86,7 +94,7 @@ struct EntryData : public Readable {
 					char ch = out.fill('0');
 					unsigned int width = out.width(8);
 					out << "filedata(\"name=" << strEncoder.UrlEncode(fileValue->name) << ";length=" << fileValue->size << ";crc32=0x";
-					out << std::hex << fileValue->crc32 << std::dec << ";encoding=base64\",{\"" << std::endl;
+					out << std::hex << fileValue->crc << std::dec << ";encoding=base64\",{\"" << std::endl;
 					out << strEncoder.Base64Encode(fileValue->data, fileValue->size) << std::endl;
 					out << "\"})";
 					out.width(width);
@@ -172,13 +180,16 @@ struct EntryData : public Readable {
 				if(fileValue != NULL) delete fileValue;
 				fileValue = new FileInfo;
 				fileValue->size = intEncoder(fileBuf->ReadInt<unsigned int>(), *extraInfo, isListVal);
-				fileValue->crc32 = intEncoder(fileBuf->ReadInt<unsigned int>(), *extraInfo, isListVal);
+				fileValue->crc = intEncoder(fileBuf->ReadInt<unsigned int>(), *extraInfo, isListVal);
 				fileValue->type = fileBuf->ReadInt<unsigned char>();
 				extraInfo->dataOffset ++;
 				StringEncoder strEncoder;
 				fileValue->name = strEncoder.Decode(fileBuf, *extraInfo, isListVal);
 				fileValue->data = fileBuf->ReadData(fileValue->size);
 				strEncoder.Decode(fileValue->data, fileValue->size, *extraInfo, isListVal);
+				if(!fileValue->IsValid()) {
+					std::cout << "INVALID FILE\n";
+				}
 				break;
 			}
 			case DT_Float: {

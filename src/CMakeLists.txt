@@ -9,6 +9,7 @@ set(SOURCE_FILES
 
 set(HEADER_FILES
 	args.h
+	crc.h
 	datatypes.h
 	netbuf.h
 	entry.h

@@ -80,13 +80,12 @@ struct StringEncoder {
 	bool Decode(unsigned char * const buf, unsigned int size, ExtraInfo &extra, bool listVal = false) {
 		if(!buf || !size) return false;
 		unsigned int first = (extra.firstOffset - extra.entryOffset) + 1;
-		unsigned int offset = 0;
 
 		for(unsigned short i = 0; i < size; i++) {
-			if(!listVal) buf[i] ^= (0x42 + first + (9 * ((extra.dataOffset + offset++) - extra.entryOffset)));
-			else buf[i] ^= (0x67 + (9 * ((extra.dataOffset + offset++) - extra.entryOffset)));
+			if(!listVal) buf[i] ^= (0x42 + first + (9 * ((extra.dataOffset + i) - extra.entryOffset)));
+			else buf[i] ^= (0x67 + (9 * ((extra.dataOffset + i) - extra.entryOffset)));
 		}
-		extra.dataOffset += offset;
+		extra.dataOffset += size;
 		return true;
 
 	}
@@ -94,7 +93,6 @@ struct StringEncoder {
 	std::string Decode(Netbuf * const dataBuf, ExtraInfo &extra, bool listVal = false) {
 		if(!dataBuf) return "";
 		unsigned int first = (extra.firstOffset - extra.entryOffset) + 1;
-		unsigned int offset = 0;
 		NumberEncoder<unsigned short> encoder;
 
 		unsigned short length = dataBuf->ReadInt<unsigned short>();
@@ -102,14 +100,14 @@ struct StringEncoder {
 		unsigned char * str = dataBuf->ReadData(length);
 		if(!str) return "";
 		for(unsigned short i = 0; i < length; i++) {
-			if(!listVal) str[i] ^= (0x42 + first + (9 * ((extra.dataOffset + offset++) - extra.entryOffset)));
-			else str[i] ^= (0x67 + (9 * ((extra.dataOffset + offset++) - extra.entryOffset)));
+			if(!listVal) str[i] ^= (0x42 + first + (9 * ((extra.dataOffset + i) - extra.entryOffset)));
+			else str[i] ^= (0x67 + (9 * ((extra.dataOffset + i) - extra.entryOffset)));
 		}
 		std::string resultStr = reinterpret_cast<char*>(str);
 		delete [] str;
 		str = NULL;
 
-		extra.dataOffset += offset;
+		extra.dataOffset += length;
 		return resultStr;
 
 	}

@@ -64,15 +64,14 @@ struct StringEncoder {
 	bool Decode(unsigned char * const str, unsigned short &length, ExtraInfo &extra, bool listVal = false) {
 		if(!str || !length) return false;
 		unsigned int first = (extra.firstOffset - extra.entryOffset) + 1;
-		unsigned int offset = 0;
 		NumberEncoder<unsigned short> encoder;
 		length = encoder(length, extra, listVal);
 
 		for(unsigned short i = 0; i < length; i++) {
-			if(!listVal) str[i] ^= (0x42 + first + (9 * ((extra.dataOffset + offset++) - extra.entryOffset)));
-			else str[i] ^= (0x67 + (9 * ((extra.dataOffset + offset++) - extra.entryOffset)));
+			if(!listVal) str[i] ^= (0x42 + first + (9 * ((extra.dataOffset + i) - extra.entryOffset)));
+			else str[i] ^= (0x67 + (9 * ((extra.dataOffset + i) - extra.entryOffset)));
 		}
-		extra.dataOffset += offset;
+		extra.dataOffset += length;
 		return true;
 
 	}
